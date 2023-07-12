@@ -1,7 +1,6 @@
 export default {
   async registerCoach(context, data) {
     const userId = context.rootGetters.userId;
-
     const token = context.rootGetters.token;
 
     const coachData = {
@@ -64,5 +63,8 @@ export default {
 
     context.commit("setCoaches", coaches);
     context.commit("setFetchTimestamp");
+  },
+  setFilter(context, payload) {
+    context.commit("setFilter", payload);
   },
 };

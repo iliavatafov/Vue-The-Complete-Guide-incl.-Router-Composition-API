@@ -2,7 +2,6 @@ let timer;
 
 export default {
   async login(context, payload) {
-    console.log(context);
     return context.dispatch("auth", {
       ...payload,
       mode: "login",
@@ -39,13 +38,14 @@ export default {
       throw error;
     }
 
-    // const expiresIn = responseData.expiresIn * 1000;
-    const expiresIn = 5000;
+    const expiresIn = responseData.expiresIn * 1000;
+    // const expiresIn = 5000;
     const expirationData = new Date().getTime() + expiresIn;
 
     localStorage.setItem("token", responseData.idToken);
     localStorage.setItem("userId", responseData.localId);
     localStorage.setItem("tokenExpiration", expirationData);
+    localStorage.setItem("userEmail", responseData.email);
 
     timer = setTimeout(() => {
       context.dispatch("autoLogout");
@@ -54,27 +54,36 @@ export default {
     context.commit("setUser", {
       token: responseData.idToken,
       userId: responseData.localId,
+      email: responseData.email,
     });
   },
   tryLogin(context) {
+    // Get stored data from localStorage
     const token = localStorage.getItem("token");
     const userId = localStorage.getItem("userId");
+    const userEmail = localStorage.getItem("userEmail");
+
     const tokenExpiration = localStorage.getItem("tokenExpiration");
 
+    // Calculate token expiration time
     const expiresIn = +tokenExpiration - new Date().getTime();
 
+    // Return if token is expired
     if (expiresIn < 0) {
       return;
     }
 
+    // Set autoLogout to execute when token expiers
     timer = setTimeout(() => {
       context.dispatch("autoLogout");
     }, expiresIn);
 
+    // If there is token and userId in localStorage set the user data in the Vuex store
     if (token && userId) {
       context.commit("setUser", {
         token: token,
         userId: userId,
+        email: userEmail,
       });
     }
   },
@@ -82,6 +91,7 @@ export default {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
     localStorage.removeItem("tokenExpiration");
+    localStorage.removeItem("userEmail");
 
     clearTimeout(timer);
 

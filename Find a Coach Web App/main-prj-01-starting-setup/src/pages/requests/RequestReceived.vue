@@ -51,6 +51,7 @@ export default {
     async loadRequests() {
       this.isLoading = true;
       try {
+        // Fetch requests by loggedin user (coach) id and save the data in the Vuex store
         await this.$store.dispatch("requests/fetchRequests");
       } catch (error) {
         if (!this.isAuthenticated) {

@@ -1,32 +1,119 @@
 <template>
-  <header>
+  <header v-if="coaches">
     <nav>
-      <h1><router-link to="/">Find a Coach</router-link></h1>
-      <li><router-link to="/coaches">All Coaches</router-link></li>
-      <li v-if="isLoggedIn">
-        <router-link to="/requests">Requests</router-link>
-      </li>
-      <li v-else>
-        <router-link to="/auth">Login</router-link>
-      </li>
-      <li v-if="isLoggedIn">
-        <base-button @click="logout">Logout</base-button>
-      </li>
+      <div class="left-nav">
+        <h1><router-link to="/">Find a Coach</router-link></h1>
+        <div>
+          <!-- <router-link to="/coaches">All Coaches</router-link> -->
+          <div class="dynamic-links">
+            <router-link
+              class="dynamic-link"
+              v-for="(routeData, index) in routesData"
+              :key="routeData.text"
+              :to="routeData.href"
+              >{{ routeData.text }}
+              <span v-if="showDivider(index)">/</span>
+            </router-link>
+          </div>
+        </div>
+      </div>
+      <ul>
+        <li v-if="isLoggedIn">
+          <router-link to="/requests">Requests</router-link>
+        </li>
+        <li v-else>
+          <router-link to="/auth">Login</router-link>
+        </li>
+        <li v-if="isLoggedIn">
+          <base-button @click="logout">Logout</base-button>
+        </li>
+      </ul>
     </nav>
   </header>
 </template>
 
 <script>
+import { mapState } from "vuex";
+
 export default {
+  data() {
+    return {
+      routesData: [
+        {
+          text: "All Coaches",
+          href: "/coaches",
+        },
+      ],
+    };
+  },
+
   computed: {
+    ...mapState("coaches", ["coaches"]),
     isLoggedIn() {
       return this.$store.getters.isAuthenticated;
+    },
+    isNeastedRoutes() {
+      return true;
+    },
+    routesDataLastIndex() {
+      return this.routesData.length - 1;
     },
   },
   methods: {
     logout() {
       this.$store.dispatch("logout");
       this.$router.replace("/coaches");
+    },
+    showDivider(index) {
+      if (this.isNeastedRoutes && this.routesDataLastIndex !== index) {
+        return true;
+      }
+    },
+  },
+  watch: {
+    "$route.params": {
+      handler: function (params) {
+        // Set routesData to inicial state
+        this.routesData = [
+          {
+            text: "All Coaches",
+            href: "/coaches",
+          },
+        ];
+        // Create dynamic variable for href
+        let href = "/coaches";
+
+        // Walk throw all params in route object and push text and href in routesData for each param
+        for (const param in params) {
+          let text = "";
+
+          // Check is param is id and if it is select the coach with the same id and assign coach full name as a text
+          if (param.includes("id")) {
+            const collectionName = this.$route.meta.collection;
+            console.log(collectionName);
+            // Fetch data from rest API
+            const coach = this.coaches.find(
+              (coach) => coach.id === params[param]
+            );
+
+            text = coach.firstName + " " + coach.lastName;
+          } else {
+            // Assign param value as text and capitalize first letter
+            text =
+              params[param].charAt(0).toUpperCase() + params[param].slice(1);
+          }
+
+          // Add param to the href
+          href = href + "/" + params[param];
+
+          this.routesData.push({
+            text,
+            href,
+          });
+        }
+      },
+      deep: true,
+      immediate: true,
     },
   },
 };
@@ -54,6 +141,33 @@ a:active,
 a:hover,
 a.router-link-active {
   border: 1px solid #f391e3;
+}
+
+header .dynamic-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+header .dynamic-link {
+  text-decoration: none;
+  color: #f391e3;
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid transparent;
+  padding: 0;
+  margin: 0;
+}
+
+header .dynamic-link:hover,
+header .dynamic-link:active,
+header .dynamic-link.router-link-active {
+  font-weight: 900;
+  border: none;
+}
+
+span {
+  padding: 1rem;
 }
 
 h1 {
@@ -84,12 +198,17 @@ header ul {
   margin: 0;
   padding: 0;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
 }
 
 li {
   margin: 0 0.5rem;
   list-style: none;
+}
+
+.left-nav {
+  display: flex;
+  align-items: center;
 }
 </style>

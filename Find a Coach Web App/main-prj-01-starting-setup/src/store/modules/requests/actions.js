@@ -12,10 +12,9 @@ export default {
       body: JSON.stringify(newRequest),
     });
 
-    const responseData = await JSON.stringify(response);
+    const responseData = await response.json();
 
     if (!response.ok) {
-      console.log(response.ok);
       const error = new Error(responseData.message || "Faild to send request.");
       throw error;
     }
@@ -27,7 +26,6 @@ export default {
   },
   async fetchRequests(context) {
     const coachId = context.rootGetters.userId;
-
     const token = context.rootGetters.token;
 
     const url = `https://vue-http-demo-6f676-default-rtdb.europe-west1.firebasedatabase.app/requests/${coachId}.json?auth=${token}`;

@@ -30,6 +30,7 @@ export default {
     async saveData(data) {
       this.isLoading = true;
       try {
+        // Add new coach to the database and set newly created coach to Vuex store
         await this.$store.dispatch("coaches/registerCoach", data);
         this.isLoading = false;
         this.$router.replace("/coaches");

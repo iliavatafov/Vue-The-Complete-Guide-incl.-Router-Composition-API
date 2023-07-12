@@ -43,6 +43,7 @@ export default {
   },
   computed: {
     submitButtonCaption() {
+      // set submit button caption based on the mode
       if (this.mode === "login") {
         return "Login";
       } else {
@@ -50,6 +51,7 @@ export default {
       }
     },
     switchModeButtonCaption() {
+      // Set switch button caption based on the mode
       if (this.mode === "login") {
         return "Signup instead";
       } else {
@@ -77,6 +79,7 @@ export default {
       };
 
       try {
+        // Perform POST request based on the mode if login mode, login request if singup, register request
         if (this.mode === "login") {
           await this.$store.dispatch("login", actionPayload);
         } else {
@@ -86,6 +89,7 @@ export default {
         const redirectUrl =
           "/" + this.$router.currentRoute._value.query.redirect || "/coaches";
 
+        // Redirect to the CoachesList
         this.$router.replace(redirectUrl);
       } catch (error) {
         this.error = error.message || "Faild to authenticate, try later.";
@@ -137,5 +141,9 @@ textarea:focus {
   border-color: #3d008d;
   background-color: #faf6ff;
   outline: none;
+}
+
+p {
+  color: red;
 }
 </style>

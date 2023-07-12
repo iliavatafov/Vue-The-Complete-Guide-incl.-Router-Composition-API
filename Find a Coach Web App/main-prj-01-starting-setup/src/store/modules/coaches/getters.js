@@ -8,7 +8,11 @@ export default {
   isCoach(_, getters, _2, rootGetters) {
     const coaches = getters.coaches;
     const userId = rootGetters.userId;
-    return coaches.some((coach) => coach.id === userId);
+    if (coaches) {
+      return coaches.some((coach) => coach.id === userId);
+    } else {
+      return;
+    }
   },
   shouldUpdate(state) {
     const lastFetch = state.lastFetch;
@@ -18,5 +22,8 @@ export default {
 
     const currentTimeStamp = new Date().getTime();
     return (currentTimeStamp - lastFetch) / 1000 > 60;
+  },
+  getFilters(state) {
+    return state.filters;
   },
 };

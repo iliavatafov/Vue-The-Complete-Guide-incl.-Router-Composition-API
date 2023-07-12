@@ -8,6 +8,11 @@ export default {
     return {
       lastFetch: null,
       coaches: null,
+      filters: {
+        frontend: true,
+        backend: true,
+        career: true,
+      },
     };
   },
   mutations,

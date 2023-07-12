@@ -115,7 +115,7 @@ export default {
       if (!this.formIsValid) {
         return;
       }
-
+      // Create object with user input
       const formData = {
         first: this.firstName.val,
         last: this.lastName.val,
@@ -123,7 +123,7 @@ export default {
         rate: this.rate.val,
         areas: this.areas.val,
       };
-
+      // Emit event and pass data to CoachRegistration component
       this.$emit("save-data", formData);
     },
     validateForm() {

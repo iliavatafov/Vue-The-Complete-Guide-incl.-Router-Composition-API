@@ -4,7 +4,7 @@
       <p>{{ error }}</p>
     </base-dialog>
     <section>
-      <coach-filter @change-filter="setFilters"></coach-filter>
+      <coach-filter></coach-filter>
     </section>
     <section>
       <base-card>
@@ -57,19 +57,22 @@ export default {
     return {
       isLoading: false,
       error: null,
-      activeFilters: {
-        frontend: true,
-        backend: true,
-        career: true,
-      },
     };
   },
   computed: {
     isLoggedIn() {
+      // Check is user logged in
       return this.$store.getters.isAuthenticated;
     },
+    activeFilters() {
+      return this.$store.getters["coaches/getFilters"];
+    },
     filterCoaches() {
+      // Get coaches list from Vuex and save it in variable
       const coaches = this.$store.getters["coaches/coaches"];
+      // const activeFilters = this.$store.getters["coaches/getFilters"];
+
+      // Filter coaches depends on checked activeFilters
       return coaches.filter((coach) => {
         if (this.activeFilters.frontend && coach.areas.includes("frontend")) {
           return true;
@@ -88,19 +91,19 @@ export default {
       });
     },
     hasCoaches() {
+      // Check are any coaches stored in the Vuex store
       return !this.isLoading && this.$store.getters["coaches/hasCoaches"];
     },
     isCoach() {
+      // Check is the current user registrated as a coach
       return this.$store.getters["coaches/isCoach"];
     },
   },
   methods: {
-    setFilters(updatedFilters) {
-      this.activeFilters = updatedFilters;
-    },
     async loadCoaches(refresh = false) {
       this.isLoading = true;
       try {
+        // Fetch caoches list from database and save it to Vuex store
         await this.$store.dispatch("coaches/loadCoaches", {
           forceRefresh: refresh,
         });
@@ -112,9 +115,6 @@ export default {
     handleError() {
       this.error = null;
     },
-  },
-  created() {
-    this.loadCoaches();
   },
 };
 </script>

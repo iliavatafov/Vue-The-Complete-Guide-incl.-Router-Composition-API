@@ -5,13 +5,14 @@ import store from "./store/index.js";
 import CoachDetail from "./pages/coaches/CoachDetail.vue";
 import CoachesList from "./pages/coaches/CoachesList.vue";
 import CoachRegistration from "./pages/coaches/CoachRegistration.vue";
-import ContactCoach from "./pages/requests/ContactCoach.vue";
+// import ContactCoach from "./pages/requests/ContactCoach.vue";
 import RequestReceived from "./pages/requests/RequestReceived.vue";
 import NotFound from "./pages/NotFound.vue";
 import UserAuth from "./pages/auth/UserAuth.vue";
 
 const router = createRouter({
   history: createWebHistory(),
+  mode: "hash",
   routes: [
     { path: "/", redirect: "/coaches" },
     { path: "/coaches", component: CoachesList },
@@ -19,12 +20,20 @@ const router = createRouter({
       path: "/coaches/:id",
       component: CoachDetail,
       props: true,
-      children: [
-        {
-          path: "contact",
-          component: ContactCoach,
-        },
-      ],
+      meta: (route) => ({ title: route.params.username }),
+      // children: [
+      //   {
+      //     path: "contact",
+      //     component: ContactCoach,
+      //   },
+      // ],
+    },
+    {
+      path: "/coaches/:id/:action",
+      component: CoachDetail,
+      // props: (route) => console.log(route.params),
+      props: true,
+      meta: { collection: "coaches" },
     },
     {
       path: "/register",
@@ -34,7 +43,7 @@ const router = createRouter({
     {
       path: "/requests",
       component: RequestReceived,
-      meta: { requeresAuth: true },
+      meta: { requiresAuth: true },
     },
     { path: "/auth", component: UserAuth },
     {
@@ -45,8 +54,9 @@ const router = createRouter({
   ],
 });
 
+// Protected routes checker
 router.beforeEach((to, _, next) => {
-  if (to.meta.requeresAuth && !store.getters.isAuthenticated) {
+  if (to.meta.requiresAuth && !store.getters.isAuthenticated) {
     next("/auth");
   } else if (to.meta.requeresUnauth && store.getters.isAuthenticated) {
     next("/coaches");

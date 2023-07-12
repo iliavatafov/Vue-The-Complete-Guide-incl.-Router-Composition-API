@@ -8,4 +8,7 @@ export default {
   setFetchTimestamp(state) {
     state.lastFetch = new Date().getTime();
   },
+  setFilter(state, payload) {
+    state.filters = payload;
+  },
 };

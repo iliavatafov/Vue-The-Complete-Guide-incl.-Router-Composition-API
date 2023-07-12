@@ -1,17 +1,20 @@
 <template>
-  <div>
+  <base-spinner v-if="!selectedCoach"></base-spinner>
+  <div v-else>
     <section>
       <base-card>
         <h2>{{ fullName }}</h2>
         <h3>${{ rate }}/hour</h3>
       </base-card>
     </section>
-    <router-view></router-view>
+    <!-- Internal route -->
+    <!-- <router-view></router-view> -->
     <section>
-      <base-card>
+      <contact-coach v-if="$route.params.action === 'contact'" />
+      <base-card v-else>
         <header>
           <h2>Interested? Reach out now!</h2>
-          <base-button link :to="contactLink">Contact</base-button>
+          <base-button link @click="tt">Contact</base-button>
         </header>
       </base-card>
     </section>
@@ -30,36 +33,44 @@
 </template>
 
 <script scoped>
+import ContactCoach from "../requests/ContactCoach.vue";
+import { mapGetters } from "vuex";
+
 export default {
-  props: ["id"],
-  data() {
-    return {
-      selectedCoach: null,
-    };
+  components: {
+    ContactCoach,
   },
+  props: ["id"],
   computed: {
+    ...mapGetters("coaches", ["coaches"]),
     fullName() {
-      return this.selectedCoach?.firstName + " " + this.selectedCoach?.lastName;
+      return this.selectedCoach.firstName + " " + this.selectedCoach.lastName;
     },
-    contactLink() {
-      return this.$route.path + "/contact";
-    },
+    // contactLink() {
+    //   console.log(this.$router);
+    //   return this.$router. "/contact";
+    // },
     areas() {
       return this.selectedCoach.areas;
     },
     rate() {
-      console.log(this.selectedCoach.hourlyRate);
       return this.selectedCoach.hourlyRate;
     },
     description() {
       return this.selectedCoach.description;
     },
+    selectedCoach() {
+      // eslint-disable-next-line no-debugger
+      // debugger;
+      // if (!this.coaches) return {}
+      // Select coach from coaches using id from query params
+      return this.coaches?.find((coach) => coach.id === this.id);
+    },
   },
-
-  async created() {
-    this.selectedCoach = this.$store.getters["coaches/coaches"].find(
-      (coach) => coach.id === this.id
-    );
+  methods: {
+    tt() {
+      this.$router.push(`/coaches/${this.id}/contact`);
+    },
   },
 };
 </script>

@@ -2,15 +2,30 @@
   <base-card>
     <h2>Find Your Coach</h2>
     <span class="filter-option">
-      <input type="checkbox" id="frontend" checked @change="setFilter" />
+      <input
+        type="checkbox"
+        id="frontend"
+        :checked="activeFilters.frontend"
+        @change="setFilter"
+      />
       <label for="frontend">Frontend</label>
     </span>
     <span class="filter-option">
-      <input type="checkbox" id="backend" checked @change="setFilter" />
+      <input
+        type="checkbox"
+        id="backend"
+        :checked="activeFilters.backend"
+        @change="setFilter"
+      />
       <label for="backend">Backend</label>
     </span>
     <span class="filter-option">
-      <input type="checkbox" id="career" checked @change="setFilter" />
+      <input
+        type="checkbox"
+        id="career"
+        :checked="activeFilters.career"
+        @change="setFilter"
+      />
       <label for="career">Career</label>
     </span>
   </base-card>
@@ -19,26 +34,22 @@
 <script>
 export default {
   props: ["updateFilter"],
-  data() {
-    return {
-      filters: {
-        frontend: true,
-        backend: true,
-        career: true,
-      },
-    };
+  computed: {
+    activeFilters() {
+      return this.$store.getters["coaches/getFilters"];
+    },
   },
-  emits: ["change-filter"],
   methods: {
     setFilter(event) {
+      // Set filters data depends on user input
       const inputId = event.target.id;
       const isActive = event.target.checked;
+
       const updatedFilters = {
-        ...this.filters,
+        ...this.activeFilters,
         [inputId]: isActive,
       };
-      this.filters = updatedFilters;
-      this.$emit("change-filter", this.filters);
+      this.$store.dispatch("coaches/setFilter", updatedFilters);
     },
   },
 };

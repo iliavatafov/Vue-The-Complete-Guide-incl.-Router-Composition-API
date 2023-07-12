@@ -6,7 +6,12 @@
     <form @submit.prevent="submitForm">
       <div class="form-control">
         <label for="email">Your E-Mail</label>
-        <input type="text" id="email" v-model.trim="email" />
+        <input
+          type="text"
+          id="email"
+          :disabled="isAuthenticated"
+          v-model.trim="email"
+        />
       </div>
       <div class="form-control">
         <label for="message">Message</label>
@@ -18,11 +23,13 @@
       <div class="actions">
         <base-button>Send Message</base-button>
       </div>
-    </form> </base-card
-  >>
+    </form>
+  </base-card>
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   data() {
     return {
@@ -31,7 +38,11 @@ export default {
       formIsValid: true,
       isLoading: false,
       error: null,
+      hasLoggedInUser: false,
     };
+  },
+  computed: {
+    ...mapGetters(["isAuthenticated", "getUserEmail"]),
   },
   methods: {
     async submitForm() {
@@ -48,6 +59,7 @@ export default {
       this.isLoading = true;
 
       try {
+        // Perform POST request and save the message and email of the sender to the database and in Vuex store
         await this.$store.dispatch("requests/contactCoach", {
           email: this.email,
           message: this.message,
@@ -65,6 +77,12 @@ export default {
     handleError() {
       this.error = null;
     },
+  },
+  created() {
+    // Check is user is authenticated and if it is set the email input with auth user email
+    if (this.isAuthenticated) {
+      this.email = this.getUserEmail;
+    }
   },
 };
 </script>
@@ -91,6 +109,7 @@ input,
 textarea {
   display: block;
   width: 100%;
+  max-width: 100%;
   font: inherit;
   border: 1px solid #ccc;
   padding: 0.15rem;
