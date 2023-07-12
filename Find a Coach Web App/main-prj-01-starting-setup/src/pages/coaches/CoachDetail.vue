@@ -14,7 +14,7 @@
       <base-card v-else>
         <header>
           <h2>Interested? Reach out now!</h2>
-          <base-button link @click="tt">Contact</base-button>
+          <base-button link :to="linkToContacts">Contact</base-button>
         </header>
       </base-card>
     </section>
@@ -33,8 +33,9 @@
 </template>
 
 <script scoped>
+import { mapActions, mapGetters } from "vuex";
+
 import ContactCoach from "../requests/ContactCoach.vue";
-import { mapGetters } from "vuex";
 
 export default {
   components: {
@@ -42,14 +43,11 @@ export default {
   },
   props: ["id"],
   computed: {
+    ...mapGetters("breadcrumbs", ["getBreadcrumbs"]),
     ...mapGetters("coaches", ["coaches"]),
     fullName() {
       return this.selectedCoach.firstName + " " + this.selectedCoach.lastName;
     },
-    // contactLink() {
-    //   console.log(this.$router);
-    //   return this.$router. "/contact";
-    // },
     areas() {
       return this.selectedCoach.areas;
     },
@@ -60,17 +58,26 @@ export default {
       return this.selectedCoach.description;
     },
     selectedCoach() {
-      // eslint-disable-next-line no-debugger
-      // debugger;
-      // if (!this.coaches) return {}
-      // Select coach from coaches using id from query params
-      return this.coaches?.find((coach) => coach.id === this.id);
+      return this.coaches.find((coach) => coach.id === this.id);
+    },
+    linkToContacts() {
+      return "/coaches/" + this.id + "/contact";
     },
   },
   methods: {
-    tt() {
-      this.$router.push(`/coaches/${this.id}/contact`);
-    },
+    ...mapActions("breadcrumbs", ["setBreadcrumbs", "replaceBreadcrumb"]),
+  },
+  created() {
+    const coach = this.coaches.find((coach) => coach.id === this.id);
+    const coachFullName = coach.firstName + " " + coach.lastName;
+
+    this.setBreadcrumbs([
+      { text: "All Coaches", to: { path: "/coaches" } },
+      {
+        text: coachFullName,
+        to: { path: `/coaches/${this.id}` },
+      },
+    ]);
   },
 };
 </script>

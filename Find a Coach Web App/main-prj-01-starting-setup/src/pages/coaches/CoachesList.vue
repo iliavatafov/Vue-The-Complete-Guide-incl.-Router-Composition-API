@@ -1,4 +1,5 @@
 <template>
+  <router-view></router-view>
   <div>
     <base-dialog :show="!!error" title="An error occured!" @close="handleError">
       <p>{{ error }}</p>
@@ -12,6 +13,15 @@
           <base-button mode="outline" @click="loadCoaches(true)"
             >Refresh</base-button
           >
+          <label for="file-upload" class="custom-file-upload">
+            Custom Upload
+          </label>
+          <input
+            id="file-upload"
+            type="file"
+            @change="handleFileUpload"
+            accept=".csv"
+          />
           <base-button link to="/auth?redirect=register" v-if="!isLoggedIn"
             >Login to Register as Coach</base-button
           >
@@ -43,6 +53,9 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
+import csvParser from "../../mixins/csvParser.js";
+
 import CoachItem from "../../components/coaches/CoachItem.vue";
 import BaseCard from "../../components/ui/BaseCard.vue";
 import CoachFilter from "../../components/coaches/CoachFilter.vue";
@@ -53,6 +66,7 @@ export default {
     BaseCard,
     CoachFilter,
   },
+  mixins: [csvParser],
   data() {
     return {
       isLoading: false,
@@ -61,7 +75,6 @@ export default {
   },
   computed: {
     isLoggedIn() {
-      // Check is user logged in
       return this.$store.getters.isAuthenticated;
     },
     activeFilters() {
@@ -70,7 +83,6 @@ export default {
     filterCoaches() {
       // Get coaches list from Vuex and save it in variable
       const coaches = this.$store.getters["coaches/coaches"];
-      // const activeFilters = this.$store.getters["coaches/getFilters"];
 
       // Filter coaches depends on checked activeFilters
       return coaches.filter((coach) => {
@@ -100,6 +112,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions("breadcrumbs", ["setBreadcrumbs"]),
     async loadCoaches(refresh = false) {
       this.isLoading = true;
       try {
@@ -112,9 +125,16 @@ export default {
       }
       this.isLoading = false;
     },
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+      this.readFile(file);
+    },
     handleError() {
       this.error = null;
     },
+  },
+  created() {
+    this.setBreadcrumbs([{ text: "All Coaches", to: { path: "/coaches" } }]);
   },
 };
 </script>
@@ -129,5 +149,28 @@ ul {
 .controls {
   display: flex;
   justify-content: space-between;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload {
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  font: inherit;
+  background-color: #3a0061;
+  border: 1px solid #3a0061;
+  color: white;
+  cursor: pointer;
+  border-radius: 30px;
+  margin-right: 0.5rem;
+  display: inline-block;
+}
+
+.custom-file-upload:hover,
+.custom-file-upload:active {
+  background-color: #270041;
+  border-color: #270041;
 }
 </style>

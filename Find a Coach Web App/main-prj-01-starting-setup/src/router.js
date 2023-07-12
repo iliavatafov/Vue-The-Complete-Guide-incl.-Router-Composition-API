@@ -5,7 +5,7 @@ import store from "./store/index.js";
 import CoachDetail from "./pages/coaches/CoachDetail.vue";
 import CoachesList from "./pages/coaches/CoachesList.vue";
 import CoachRegistration from "./pages/coaches/CoachRegistration.vue";
-// import ContactCoach from "./pages/requests/ContactCoach.vue";
+import ContactCoach from "./pages/requests/ContactCoach.vue";
 import RequestReceived from "./pages/requests/RequestReceived.vue";
 import NotFound from "./pages/NotFound.vue";
 import UserAuth from "./pages/auth/UserAuth.vue";
@@ -15,25 +15,29 @@ const router = createRouter({
   mode: "hash",
   routes: [
     { path: "/", redirect: "/coaches" },
-    { path: "/coaches", component: CoachesList },
+    {
+      path: "/coaches",
+      component: CoachesList,
+      meta: {
+        text: "All Coaches",
+      },
+    },
     {
       path: "/coaches/:id",
       component: CoachDetail,
+      name: "coach-show",
       props: true,
-      meta: (route) => ({ title: route.params.username }),
-      // children: [
-      //   {
-      //     path: "contact",
-      //     component: ContactCoach,
-      //   },
-      // ],
+      meta: {
+        text: ":id",
+      },
     },
     {
-      path: "/coaches/:id/:action",
-      component: CoachDetail,
-      // props: (route) => console.log(route.params),
-      props: true,
-      meta: { collection: "coaches" },
+      path: "/coaches/:id/contact",
+      component: ContactCoach,
+      name: "coach-contact",
+      meta: {
+        text: "Contact",
+      },
     },
     {
       path: "/register",

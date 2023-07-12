@@ -8,10 +8,10 @@
           <div class="dynamic-links">
             <router-link
               class="dynamic-link"
-              v-for="(routeData, index) in routesData"
-              :key="routeData.text"
-              :to="routeData.href"
-              >{{ routeData.text }}
+              v-for="(getBreadcrumb, index) in getBreadcrumbs"
+              :key="getBreadcrumb.text"
+              :to="getBreadcrumb.to"
+              >{{ getBreadcrumb.text }}
               <span v-if="showDivider(index)">/</span>
             </router-link>
           </div>
@@ -33,22 +33,17 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapGetters } from "vuex";
 
 export default {
   data() {
     return {
-      routesData: [
-        {
-          text: "All Coaches",
-          href: "/coaches",
-        },
-      ],
+      isBreadcrumbs: false,
     };
   },
-
   computed: {
-    ...mapState("coaches", ["coaches"]),
+    ...mapGetters("coaches", ["coaches"]),
+    ...mapGetters("breadcrumbs", ["getBreadcrumbs"]),
     isLoggedIn() {
       return this.$store.getters.isAuthenticated;
     },
@@ -56,7 +51,7 @@ export default {
       return true;
     },
     routesDataLastIndex() {
-      return this.routesData.length - 1;
+      return this.getBreadcrumbs.length - 1;
     },
   },
   methods: {
@@ -70,52 +65,57 @@ export default {
       }
     },
   },
-  watch: {
-    "$route.params": {
-      handler: function (params) {
-        // Set routesData to inicial state
-        this.routesData = [
-          {
-            text: "All Coaches",
-            href: "/coaches",
-          },
-        ];
-        // Create dynamic variable for href
-        let href = "/coaches";
+  // watch: {
+  //   getBreadcrumbs(value) {
+  //     if (value.length > 0) {
+  //       this.isBreadcrumbs = true;
+  //     }
+  //   },
+  // },
+  // watch: {
+  //   "$route.params": {
+  //     handler: function (params) {
+  //       // Set routesData to inicial state
+  //       this.routesData = [
+  //         {
+  //           text: "All Coaches",
+  //           href: "/coaches",
+  //         },
+  //       ];
+  //       // Create dynamic variable for href
+  //       let href = "/coaches";
 
-        // Walk throw all params in route object and push text and href in routesData for each param
-        for (const param in params) {
-          let text = "";
+  //       // Walk throw all params in route object and push text and href in routesData for each param
+  //       for (const param in params) {
+  //         let text = "";
 
-          // Check is param is id and if it is select the coach with the same id and assign coach full name as a text
-          if (param.includes("id")) {
-            const collectionName = this.$route.meta.collection;
-            console.log(collectionName);
-            // Fetch data from rest API
-            const coach = this.coaches.find(
-              (coach) => coach.id === params[param]
-            );
+  //         // Check is param is id and if it is select the coach with the same id and assign coach full name as a text
+  //         if (param.includes("id")) {
+  //           // Fetch data from rest API
+  //           const coach = this.coaches.find(
+  //             (coach) => coach.id === params[param]
+  //           );
 
-            text = coach.firstName + " " + coach.lastName;
-          } else {
-            // Assign param value as text and capitalize first letter
-            text =
-              params[param].charAt(0).toUpperCase() + params[param].slice(1);
-          }
+  //           text = coach.firstName + " " + coach.lastName;
+  //         } else {
+  //           // Assign param value as text and capitalize first letter
+  //           text =
+  //             params[param].charAt(0).toUpperCase() + params[param].slice(1);
+  //         }
 
-          // Add param to the href
-          href = href + "/" + params[param];
+  //         // Add param to the href
+  //         href = href + "/" + params[param];
 
-          this.routesData.push({
-            text,
-            href,
-          });
-        }
-      },
-      deep: true,
-      immediate: true,
-    },
-  },
+  //         this.routesData.push({
+  //           text,
+  //           href,
+  //         });
+  //       }
+  //     },
+  //     deep: true,
+  //     immediate: true,
+  //   },
+  // },
 };
 </script>
 

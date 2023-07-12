@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
   data() {
@@ -43,8 +43,11 @@ export default {
   },
   computed: {
     ...mapGetters(["isAuthenticated", "getUserEmail"]),
+    ...mapGetters("breadcrumbs", ["getBreadcrumbs"]),
+    ...mapGetters("coaches", ["coaches"]),
   },
   methods: {
+    ...mapActions("breadcrumbs", ["setBreadcrumbs"]),
     async submitForm() {
       this.formIsValid = true;
       if (
@@ -79,6 +82,23 @@ export default {
     },
   },
   created() {
+    const coachId = this.$route.params.id;
+
+    const coach = this.coaches.find((coach) => coach.id === coachId);
+    const coachFullName = coach.firstName + " " + coach.lastName;
+
+    this.setBreadcrumbs([
+      { text: "All Coaches", to: { path: "/coaches" } },
+      {
+        text: coachFullName,
+        to: { path: `/coaches/${coachId}` },
+      },
+      {
+        text: "Contact",
+        to: { path: `/coaches/${coachId}/contact` },
+      },
+    ]);
+
     // Check is user is authenticated and if it is set the email input with auth user email
     if (this.isAuthenticated) {
       this.email = this.getUserEmail;
