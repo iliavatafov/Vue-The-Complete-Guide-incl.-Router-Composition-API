@@ -1,54 +1,77 @@
 <template>
-  <router-view></router-view>
-  <div>
-    <base-dialog :show="!!error" title="An error occured!" @close="handleError">
+  <div class="import-wrapper" v-if="newCoaches || errorData.isError">
+    <base-dialog
+      v-if="errorMessage"
+      :show="!!errorData.isError"
+      :title="errorData.errorMessage"
+      @close="handleFileUploadError"
+    >
       <p>{{ error }}</p>
     </base-dialog>
-    <section>
-      <coach-filter></coach-filter>
-    </section>
-    <section>
-      <base-card>
-        <div class="controls">
-          <base-button mode="outline" @click="loadCoaches(true)"
-            >Refresh</base-button
-          >
-          <label for="file-upload" class="custom-file-upload">
-            Custom Upload
-          </label>
-          <input
-            id="file-upload"
-            type="file"
-            @change="handleFileUpload"
-            accept=".csv"
-          />
-          <base-button link to="/auth?redirect=register" v-if="!isLoggedIn"
-            >Login to Register as Coach</base-button
-          >
-          <base-button
-            v-if="isLoggedIn && !isCoach && !isLoading"
-            link
-            to="/register"
-            >Register as Coach</base-button
-          >
-        </div>
-        <div v-if="isLoading">
-          <base-spinner></base-spinner>
-        </div>
-        <ul v-else-if="hasCoaches">
-          <coach-item
-            v-for="coach in filterCoaches"
-            :key="coach.id"
-            :id="coach.id"
-            :first-name="coach.firstName"
-            :last-name="coach.lastName"
-            :rate="coach.hourlyRate"
-            :areas="coach.areas"
-          ></coach-item>
-        </ul>
-        <h3 v-else>No coaches found.</h3>
-      </base-card>
-    </section>
+    <confirm-imported-coaches
+      :new-coaches="newCoaches"
+      :cancel-import="cancelImport"
+      :confirm-import="confirmImport"
+    ></confirm-imported-coaches>
+  </div>
+  <div v-else>
+    <router-view></router-view>
+    <div>
+      <base-dialog
+        :show="!!error"
+        title="An error occured!"
+        @close="handleError"
+      >
+        <p>{{ error }}</p>
+      </base-dialog>
+      <section>
+        <coach-filter></coach-filter>
+      </section>
+      <section>
+        <base-card>
+          <div class="controls">
+            <base-button mode="outline" @click="loadCoaches(true)"
+              >Refresh</base-button
+            >
+            <div v-if="isLoggedIn">
+              <label for="file-upload" class="custom-file-upload">
+                Upload coaches CSV
+              </label>
+              <input
+                id="file-upload"
+                type="file"
+                @change="handleFileUpload"
+                accept=".csv"
+              />
+            </div>
+            <base-button link to="/auth?redirect=register" v-if="!isLoggedIn"
+              >Login to Register as Coach</base-button
+            >
+            <base-button
+              v-if="isLoggedIn && !isCoach && !isLoading"
+              link
+              to="/register"
+              >Register as Coach</base-button
+            >
+          </div>
+          <div v-if="isLoading">
+            <base-spinner></base-spinner>
+          </div>
+          <ul v-else-if="hasCoaches">
+            <coach-item
+              v-for="coach in filterCoaches"
+              :key="coach.id"
+              :id="coach.id"
+              :first-name="coach.firstName"
+              :last-name="coach.lastName"
+              :rate="coach.hourlyRate"
+              :areas="coach.areas"
+            ></coach-item>
+          </ul>
+          <h3 v-else>No coaches found.</h3>
+        </base-card>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -59,12 +82,14 @@ import csvParser from "../../mixins/csvParser.js";
 import CoachItem from "../../components/coaches/CoachItem.vue";
 import BaseCard from "../../components/ui/BaseCard.vue";
 import CoachFilter from "../../components/coaches/CoachFilter.vue";
+import ConfirmImportedCoaches from "@/components/coaches/ConfirmImportedCoaches.vue";
 
 export default {
   components: {
     CoachItem,
     BaseCard,
     CoachFilter,
+    ConfirmImportedCoaches,
   },
   mixins: [csvParser],
   data() {
@@ -113,6 +138,7 @@ export default {
   },
   methods: {
     ...mapActions("breadcrumbs", ["setBreadcrumbs"]),
+    ...mapActions("coaches", ["registerCoaches"]),
     async loadCoaches(refresh = false) {
       this.isLoading = true;
       try {
@@ -125,12 +151,21 @@ export default {
       }
       this.isLoading = false;
     },
-    handleFileUpload(event) {
-      const file = event.target.files[0];
-      this.readFile(file);
-    },
     handleError() {
       this.error = null;
+    },
+    async confirmImport() {
+      this.isLoading = true;
+      try {
+        await this.registerCoaches(this.newCoaches);
+      } catch (error) {
+        this.error = error.message || "Somthing get wrong!";
+      }
+      this.newCoaches = null;
+      this.isLoading = false;
+    },
+    cancelImport() {
+      this.newCoaches = null;
     },
   },
   created() {
@@ -140,6 +175,14 @@ export default {
 </script>
 
 <style scoped>
+.import-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10vh;
+  margin-bottom: 10vh;
+}
 ul {
   list-style: none;
   margin: 0;

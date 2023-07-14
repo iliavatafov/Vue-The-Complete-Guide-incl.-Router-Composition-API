@@ -33,7 +33,6 @@
 
 <script>
 export default {
-  props: ["updateFilter"],
   computed: {
     activeFilters() {
       return this.$store.getters["coaches/getFilters"];

@@ -64,6 +64,32 @@ button:active {
   color: #270041;
 }
 
+.green {
+  background-color: green;
+  color: #fff;
+  border: none;
+}
+
+.green:hover,
+.green:active {
+  background-color: #fff;
+  border: 2px solid green;
+  color: green;
+}
+
+.red {
+  background-color: red;
+  color: #fff;
+  border: none;
+}
+
+.red:hover,
+.red:active {
+  background-color: #fff;
+  border: 2px solid red;
+  color: red;
+}
+
 .flat:hover,
 .flat:active,
 .outline:hover,

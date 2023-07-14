@@ -1,15 +1,20 @@
-import { convertStringToJSON } from "@/utils";
+import { convertCSVStrToArray } from "@/utils/convertCSVStrToArray";
 
 export default {
   data() {
     return {
-      errorMessage: null,
+      errorData: {
+        isError: false,
+        errorMessage: null,
+      },
+      newCoaches: null,
     };
   },
   methods: {
     handleFileUpload(event) {
       if (!event.target.files) {
-        this.errorMessage =
+        this.isError = true;
+        this.errorData.errorMessage =
           "Somthing went wrong! Please try to attach the file again.";
       }
       const file = event.target.files[0];
@@ -22,12 +27,25 @@ export default {
         this.processCSVData(contents);
       };
       reader.onerror = () => {
-        this.errorMessage = "Error occurred while reading the file.";
+        this.isError = true;
+        this.errorData.errorMessage = "Error occurred while reading the file.";
       };
       reader.readAsText(file);
     },
     processCSVData(contents) {
-      convertStringToJSON(contents);
+      const data = convertCSVStrToArray(contents);
+      if (data) {
+        this.newCoaches = data;
+      } else {
+        this.isError = true;
+        this.errorData.errorMessage = "Error occurred while data parsing.";
+      }
+    },
+    handleFileUploadError() {
+      this.errorData = {
+        isError: false,
+        errorMessage: null,
+      };
     },
   },
 };

@@ -8,6 +8,7 @@ export default {
     return {
       lastFetch: null,
       coaches: null,
+      rawCoaches: null,
       filters: {
         frontend: true,
         backend: true,

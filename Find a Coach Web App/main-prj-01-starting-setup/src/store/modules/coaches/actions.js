@@ -1,3 +1,5 @@
+import { generateUserId } from "@/utils/idGenerator";
+
 export default {
   async registerCoach(context, data) {
     const userId = context.rootGetters.userId;
@@ -18,7 +20,7 @@ export default {
       body: JSON.stringify(coachData),
     });
 
-    // const responseData = await response.data();
+    await response.json();
 
     if (!response.ok) {
       const error = new Error(response.message || "Faild to fetch!");
@@ -62,9 +64,51 @@ export default {
     }
 
     context.commit("setCoaches", coaches);
+    context.commit("setRawCoaches", responseData);
     context.commit("setFetchTimestamp");
   },
   setFilter(context, payload) {
     context.commit("setFilter", payload);
+  },
+  async registerCoaches(context, payload) {
+    const currentCoaches = context.getters.rawCoaches;
+
+    const newCoaches = payload.reduce((acc, value) => {
+      const userId = generateUserId();
+      acc[userId] = value;
+      return acc;
+    }, {});
+
+    const mergedCoaches = currentCoaches
+      ? Object.assign(currentCoaches, newCoaches)
+      : newCoaches;
+
+    const url = `https://vue-http-demo-6f676-default-rtdb.europe-west1.firebasedatabase.app/coaches.json`;
+
+    const response = await fetch(url, {
+      method: "PUT",
+      body: JSON.stringify(mergedCoaches),
+    });
+
+    if (!response.ok) {
+      const error = new Error(response.message || "Faild to post!");
+      throw error;
+    }
+
+    const coaches = [];
+
+    for (const key in mergedCoaches) {
+      const coach = {
+        id: key,
+        firstName: mergedCoaches[key].firstName,
+        lastName: mergedCoaches[key].lastName,
+        description: mergedCoaches[key].description,
+        hourlyRate: mergedCoaches[key].hourlyRate,
+        areas: mergedCoaches[key].areas,
+      };
+      coaches.push(coach);
+    }
+
+    context.commit("setCoaches", coaches);
   },
 };
